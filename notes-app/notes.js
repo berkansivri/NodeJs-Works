@@ -17,7 +17,7 @@ const addNote = (title, body) => {
     console.log(chalk.red.inverse("note title taken"))
   }
 }
-
+ 
 const removeNote = (title) => {
   const notes = loadNotes()
   const newNotes = notes.filter(n => n.title !== title)
