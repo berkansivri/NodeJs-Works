@@ -9,57 +9,62 @@ const port = process.env.PORT || 3000
 //automaticly parse to json request bodies
 app.use(express.json())
 
-app.post('/users', (req, res) => {
+app.post('/users', async (req, res) => {
   const user = new User(req.body)
-  user.save().then(() => {
+  try {
+    await user.save()
     res.status(201).send(user)
-  }).catch((err) => {
-    res.status(400).send(err)
-  })
+  } catch (error) {
+      res.status(400).send(error)
+  }
 })
 
-app.get('/users', (req, res) => {
-  User.find({}).then((users) => {
+app.get('/users', async (req, res) => {
+  try {
+    const users = await User.find({})
     res.send(users)
-  }).catch((e) => {
+  } catch (e) {
     res.status(500).send(e)
-  })
+  }
 })
 
-app.get('/users/:id', (req, res) => {
-  User.findById(req.params.id).then((user) => {
-    if(!user) res.status(404).send("User not found by id:" + req.params.id)
-    res.send(user)
-  }).catch((e) => {
+app.get('/users/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+    if(!user) res.status(404).send()
+    else res.send(user)
+  } catch (e) {
     res.status(500).send(e)
-  })
+  }
 })
 
-app.post('/tasks', (req, res) => {
+app.post('/tasks', async (req, res) => {
   const task = new Task(req.body)
-  task.save().then(() => {
+  try {
+    await task.save()
     res.status(201).send(task)
-  }).catch((err) => {
-    res.status(400).send(err)
-  })
+  } catch (e) {
+    res.status(400).send(e)
+  }
 })
 
-app.get('/tasks', (req, res) => {
-  Task.find({}).then((tasks) => {
+app.get('/tasks', async (req, res) => {
+  try {
+    const tasks = await Task.find({})
     res.send(tasks)
-  }).catch((err) => {
-    res.status(400).send(err)
-  })
+  } catch (error) {
+    res.status(400).send(error)
+  }
 })
 
-app.get('/tasks/:id', (req, res) => {
-  Task.findById(req.params.id).then((task) => {
-    console.log(task);
+app.get('/tasks/:id', async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id)
     if(!task) res.status(404).send("Task not found by id:" + req.params.id)
     res.send(task)
-  }).catch((err) => {
-    res.status(400).send(err)
-  })
+  } catch (e) {
+    res.status(400).send(e)
+  }
 })
 
 app.listen(port, () => {
