@@ -13,6 +13,28 @@ const sidebarTemplate = document.querySelector('#sidebar-template').innerHTML
 // Options
 const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true })
 
+const autoscroll = () => {
+  const $newMessage = $messages.lastElementChild
+  
+  // height of new message
+  const newMessageStyles = getComputedStyle($newMessage)
+  const newMessageMargin = parseInt(newMessageStyles.marginBottom)
+  const newMessageHeight = $newMessage.offsetHeight + newMessageMargin
+
+  // visible height
+  const visibleHeight = $messages.offsetHeight
+
+  // height of messages container
+  const containerHeight = $messages.scrollHeight
+
+  // how far have I scrolled?
+  const scrollOffset = $messages.scrollTop + visibleHeight
+
+  if (containerHeight - newMessageHeight <= scrollOffset) {
+    $messages.scrollTop = containerHeight
+  }
+}
+
 socket.on('locationMessage', (message) => {
   const html = Mustache.render(urlTemplate, {
     username: message.username,
@@ -20,6 +42,7 @@ socket.on('locationMessage', (message) => {
     createdAt: moment(message.createdAt).format('h:mm a')
   })
   $messages.insertAdjacentHTML('beforeend', html)
+  autoscroll()
 })
 
 socket.on('message', (message) => {
@@ -29,6 +52,7 @@ socket.on('message', (message) => {
     createdAt: moment(message.createdAt).format('h:mm a')
   })
   $messages.insertAdjacentHTML("beforeend", html)
+  autoscroll()
 })
 
 socket.on('roomData', ({ room, users }) => {
@@ -65,7 +89,7 @@ document.querySelector('#send-location').addEventListener('click', () => {
   $sendLocationButton.setAttribute('disabled', 'disabled')
   navigator.geolocation.getCurrentPosition((position) => {
     socket.emit('sendLocation', { 
-      latitude: position.coords.latitude,
+      latitude: position.coords.latitude, 
       longitude: position.coords.longitude
     }, () => {
         $sendLocationButton.removeAttribute('disabled')
